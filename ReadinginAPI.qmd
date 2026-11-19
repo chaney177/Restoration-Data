@@ -1,0 +1,75 @@
+---
+title: "Downloading EcoAtlas Project Data"
+format: html
+---
+
+```{r}
+library(reticulate)
+```
+
+```{python}
+import requests
+
+# Base URL for the API
+base_url = "api.ecoatlas.org/projects/{region_type_key}/{region_key}"
+
+# Specify the note name to download
+note_name = "region_type_key"
+
+try:
+    # Send a GET request to the API, enabling streaming for large file responses
+    response = requests.get(f"{base_url}/notes/{note_name}", stream=True)
+    
+    # Raise an HTTPError for bad responses (4xx and 5xx status codes)
+    response.raise_for_status()
+    
+    # Define the filename for storing the downloaded content
+    file_name = f"downloaded_{note_name}"
+    
+    # Open the local file in binary write mode
+    with open(file_name, "wb") as file:
+        # Iterate over the response data in chunks
+        for chunk in response.iter_content(chunk_size=1024):
+            file.write(chunk)
+
+except requests.exceptions.HTTPError as http_err:
+    # Handle HTTP errors
+    error_message = response.json().get('error', 'Unknown error')
+    print(f"HTTP error occurred: {http_err}\nError: {error_message}")
+except requests.exceptions.RequestException as err:
+    # Handle other request exceptions
+    print(f"Other error occurred: {err}")
+```
+
+```{r}
+#| label: load packages
+
+library(readr)
+library(dplyr)
+library(lubridate)
+library(plotly)
+library(DT)
+```
+
+```{r}
+#| label: load data
+
+# Set paths
+restoration_ecoatlas_url <- "api.ecoatlas.org/projects/{region_type_key}/{region_key}"
+data_dir <- "data"
+restoration_file <- file.path(data_dir, "restoration_ecoatlas.txt")
+
+# Download data if not already cached
+if (!file.exists(restoration_file)) {
+  message("Downloading file...")
+  dir.create(data_dir, showWarnings = FALSE, recursive = TRUE)
+  download.file(
+    url = restoration_ecoatlas_url,
+    destfile = restoration_file
+  )
+  message("Saved to: ", restoration_file)
+} else {
+  message("Using cached file.")
+}
+
+```

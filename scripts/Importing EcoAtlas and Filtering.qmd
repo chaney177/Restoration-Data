@@ -1,0 +1,52 @@
+---
+title: "EcoAtlas November 2026"
+format: html
+---
+Packages
+```{r}
+library("sf")
+library("dplyr")
+library("librarian")
+library("here")
+```
+
+Shapefile- Download and Read Files
+
+```{r}
+rest2026_dir <- here::here('data/ecoatlas_sitefunding_20261116_131730')
+
+# Check if directory exists; if not, create it and pull data
+if(!dir.exists(rest2026_dir)) {
+    dir.create(rest2026_dir, recursive = TRUE)
+}
+delta_dir<-here::here('data/Legal_Delta')
+# Check if directory exists; if not, create it and pull data
+if(!dir.exists(delta_dir)) {
+    dir.create(delta_dir, recursive = TRUE)
+}
+```
+
+```{r}
+Restoration_Nov26<- read_sf(here("data/ecoatlas_sitefunding_20261116_131730/habitatprojects_sites_activities_funding.shp"))
+Legal_Delta_boundary<- read_sf(here("data/Legal_Delta/Legal_Delta_SM.shp"))
+```
+
+#Checking geography- both are CA Albers
+```{r}
+st_crs(Restoration_Nov26)
+st_crs(Legal_Delta_boundary)
+```
+
+Quick look at the Restoration Data
+```{r}
+glimpse(Restoration_Nov26)
+```
+
+Trying to Clip Restoration to Delta
+```{r}
+Delta_union <- st_union(Legal_Delta_boundary)
+rest26_clipped <- st_intersection(Restoration_Nov26, Delta_union)
+```
+
+
+```

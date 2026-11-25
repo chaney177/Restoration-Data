@@ -39,7 +39,7 @@ st_crs(Legal_Delta_boundary)
 
 Quick look at the Restoration Data
 ```{r}
-glimpse(Restoration_Nov26)
+head(Restoration_Nov26)
 ```
 
 Trying to Clip Restoration to Delta
@@ -48,5 +48,26 @@ Delta_union <- st_union(Legal_Delta_boundary)
 rest26_clipped <- st_intersection(Restoration_Nov26, Delta_union)
 ```
 
-
+Testing Clip
+```{r}
+plot(rest26_clipped)
 ```
+
+Checking Normal class (is as expected)
+```{r}
+class(rest26_clipped)
+```
+
+Filtering for Year
+```{r}
+### filter() works exactly as expected!
+rest_lastupdate<- rest26_clipped %>%
+    filter(lastupdate > "2025-03-19")
+```
+
+Saving As Shapefile
+
+```{r}
+write_sf(rest_lastupdate, here("data/Restoration031525-11162026.gpkg"))
+```
+
